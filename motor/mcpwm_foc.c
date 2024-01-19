@@ -1094,12 +1094,12 @@ void mcpwm_foc_set_current_off_delay(float delay_sec) {
 
 float mcpwm_foc_get_tot_current_motor(bool is_second_motor) {
 	volatile motor_all_state_t *motor = M_MOTOR(is_second_motor);
-	return SIGN(motor->m_motor_state.vq * motor->m_motor_state.iq) * motor->m_motor_state.i_abs;
+	return SIGN(motor->m_motor_state.duty_now) * motor->m_motor_state.i_abs;
 }
 
 float mcpwm_foc_get_tot_current_filtered_motor(bool is_second_motor) {
 	volatile motor_all_state_t *motor = M_MOTOR(is_second_motor);
-	return SIGN(motor->m_motor_state.vq * motor->m_motor_state.iq_filter) * motor->m_motor_state.i_abs_filter;
+	return SIGN(motor->m_motor_state.duty_now) * motor->m_motor_state.i_abs_filter;
 }
 
 float mcpwm_foc_get_tot_current_in_motor(bool is_second_motor) {
@@ -1160,7 +1160,7 @@ float mcpwm_foc_get_rpm_faster(void) {
  */
 float mcpwm_foc_get_tot_current(void) {
 	volatile motor_all_state_t *motor = get_motor_now();
-	return SIGN(motor->m_motor_state.vq * motor->m_motor_state.iq) * motor->m_motor_state.i_abs;
+	return SIGN(motor->m_motor_state.duty_now) * motor->m_motor_state.i_abs;
 }
 
 /**
@@ -1173,7 +1173,7 @@ float mcpwm_foc_get_tot_current(void) {
  */
 float mcpwm_foc_get_tot_current_filtered(void) {
 	volatile motor_all_state_t *motor = get_motor_now();
-	return SIGN(motor->m_motor_state.vq * motor->m_motor_state.iq_filter) * motor->m_motor_state.i_abs_filter;
+	return SIGN(motor->m_motor_state.duty_now) * motor->m_motor_state.i_abs_filter;
 }
 
 /**
