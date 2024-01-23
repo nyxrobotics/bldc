@@ -4280,8 +4280,23 @@ static void control_current(motor_all_state_t *motor, float dt) {
 		ki = motor->m_current_ki_temp_comp;
 	}
 
-	state_m->vd_int += Ierr_d * (ki * d_gain_scale * dt);
-	state_m->vq_int += Ierr_q * (ki * dt);
+    // Limit I control in abnormal state
+	float tot_target = NORM2_f(state_m->id_target, state_m->iq_target);
+	float tot_state = NORM2_f(state_m->id, state_m->iq);
+    if (tot_target * 3.0 < tot_state){
+    	// Abnormal state
+		if(fabsf(state_m->vq_int) > fabsf(Ierr_q * (ki * dt))){
+		    state_m->vd_int -= SIGN(state_m->vd_int) * fabsf(Ierr_d) * (ki * d_gain_scale * dt);
+			state_m->vq_int -= SIGN(state_m->vq_int) * fabsf(Ierr_q) * (ki * dt);
+		}else{
+		    state_m->vd_int = 0;
+			state_m->vq_int = 0;
+		}
+    }else{
+    	// Normal state
+		state_m->vd_int += Ierr_d * (ki * d_gain_scale * dt);
+		state_m->vq_int += Ierr_q * (ki * dt);
+    }
 
 	// Feedback (PI controller). No D action needed because the plant is a first order system (tf = 1/(Ls+R))
 	state_m->vd = state_m->vd_int + Ierr_d * conf_now->foc_current_kp * d_gain_scale;
@@ -4641,6 +4656,13 @@ static void control_current(motor_all_state_t *motor, float dt) {
 	// Calculate the duty cycles for all the phases. This also injects a zero modulation signal to
 	// be able to fully utilize the bus voltage. See https://microchipdeveloper.com/mct5001:start
 	foc_svm(state_m->mod_alpha_raw, state_m->mod_beta_raw, top, &duty1, &duty2, &duty3, (uint32_t*)&state_m->svm_sector);
+	
+	// Limiting total current softly
+	if(tot_state > tot_target){
+		duty1 *= tot_target / tot_state;
+		duty2 *= tot_target / tot_state;
+		duty3 *= tot_target / tot_state;
+	}
 
 	if (motor == &m_motor_1) {
 		TIMER_UPDATE_DUTY_M1(duty1, duty2, duty3);
