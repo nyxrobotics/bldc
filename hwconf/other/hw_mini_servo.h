@@ -230,6 +230,7 @@
 
 // Battery curent sensing
 #define HW_HAS_INPUT_CURRENT_SENSOR
+// TODO: 0.0076 is the magic number
 #define GET_INPUT_CURRENT()    (0.0076 * (fabsf(2048.0 - (float)ADC_Value[ADC_IND_CURR1]) + fabsf(2048.0 - (float)ADC_Value[ADC_IND_CURR2]) + fabsf(2048.0 - (float)ADC_Value[ADC_IND_CURR3])))
 #define GET_INPUT_CURRENT_OFFSET() 0
 #define MEASURE_INPUT_CURRENT_OFFSET() 0

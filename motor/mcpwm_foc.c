@@ -4283,6 +4283,10 @@ static void control_current(motor_all_state_t *motor, float dt) {
     // Limit I control in abnormal state
 	float tot_target = NORM2_f(state_m->id_target, state_m->iq_target);
 	float tot_state = NORM2_f(state_m->id, state_m->iq);
+	// TODO: Not sure why this works, 3.0 is the magic number
+	// Current control works fine with this
+	// The power control is strange, and when I set the limit to 5W, it stabilizes at 15W internally
+	// At this time, the power measurement value of the external measuring device is 10W
     if (tot_target * 3.0 < tot_state){
     	// Abnormal state
 		if(fabsf(state_m->vq_int) > fabsf(Ierr_q * (ki * dt))){
